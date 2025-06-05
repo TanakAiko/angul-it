@@ -1,0 +1,60 @@
+[
+    {
+        "id": 1,
+        "type": "image-select",
+        "question": "Select all images with a bus",
+        "images": [
+            {
+                "url": "img1.jpg",
+                "id": "img1"
+            },
+            {
+                "url": "img2.jpg",
+                "id": "img2"
+            },
+            {
+                "url": "img3.jpg",
+                "id": "img3"
+            }
+        ],
+        "correct": [
+            "img1",
+            "img3"
+        ]
+    },
+    {
+        "id": 2,
+        "type": "text",
+        "question": "What is the capital of Senegal?",
+        "correct": "Dakar"
+    },
+    {
+        "id": 3,
+        "type": "math",
+        "question": "What is 12 + 8?",
+        "correct": 20
+    },
+    {
+        "id": 4,
+        "type": "image-select",
+        "question": "Select all images with a cat",
+        "images": [
+            {
+                "url": "img1.jpg",
+                "id": "img1"
+            },
+            {
+                "url": "img2.jpg",
+                "id": "img2"
+            },
+            {
+                "url": "img3.jpg",
+                "id": "img3"
+            }
+        ],
+        "correct": [
+            "img1",
+            "img2"
+        ]
+    }
+]
