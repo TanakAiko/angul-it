@@ -1,5 +1,17 @@
 <div class="captcha-container">
+  <!-- Header -->
   <div class="captcha-header">
+    <div class="header-actions">
+      <button class="btn btn-ghost" (click)="goHome()">
+        <span class="btn-icon">🏠</span>
+        Home
+      </button>
+      <button class="btn btn-ghost" (click)="restart()">
+        <span class="btn-icon">🔄</span>
+        Restart
+      </button>
+    </div>
+    
     <h1>Security Verification</h1>
     <p>Complete all three levels to verify you're human</p>
     
@@ -28,85 +40,111 @@
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
     <div class="spinner"></div>
-    <p>Loading captcha...</p>
+    <p>Loading captcha challenges...</p>
   </div>
 
-  <!-- Success State -->
-  <div *ngIf="showSuccess" class="success-container">
-    <div class="success-icon">✓</div>
-    <h2>Verification Complete!</h2>
-    <p>You have successfully completed all security challenges.</p>
-    <button class="btn btn-primary" (click)="restart()">Start New Challenge</button>
+  <!-- Level Transition -->
+  <div *ngIf="showLevelTransition" class="transition-container">
+    <div class="transition-content">
+      <div class="success-icon">✓</div>
+      <h2>Level {{ currentLevel }} Complete!</h2>
+      <p>Moving to level {{ currentLevel + 1 }}...</p>
+    </div>
   </div>
 
   <!-- Challenge Content -->
-  <div *ngIf="!isLoading && !showSuccess && captchaData" class="challenge-container">
+  <div *ngIf="!isLoading && !showLevelTransition && currentChallenge" class="challenge-container">
     <div class="challenge-header">
+      <div class="level-navigation">
+        <button *ngIf="canGoToPreviousLevel()" 
+                class="btn btn-outline btn-small" 
+                (click)="goToPreviousLevel()">
+          <span class="btn-icon">←</span>
+          Previous Level
+        </button>
+      </div>
+      
       <h2>Level {{ currentLevel }} of 3</h2>
-      <p class="challenge-question">{{ getCurrentChallenge()?.question }}</p>
+      <p class="challenge-question">{{ currentChallenge.question }}</p>
     </div>
 
-    <!-- Image Selection Challenge -->
-    <div *ngIf="getCurrentChallenge()?.type === 'image-select'" class="image-challenge">
-      <div class="image-grid">
-        <div *ngFor="let image of getCurrentChallenge()?.images" 
-             class="image-item"
-             [class.selected]="isImageSelected(image.id)"
-             (click)="onImageSelect(image.id)">
-          <img [src]="'https://picsum.photos/200/150?random=' + image.id" 
-               [alt]="'Challenge image ' + image.id"
-               loading="lazy">
-          <div class="image-overlay">
-            <div class="checkmark" *ngIf="isImageSelected(image.id)">✓</div>
+    <form [formGroup]="captchaForm" (ngSubmit)="submitAnswer()">
+      <!-- Image Selection Challenge -->
+      <div *ngIf="currentChallenge.type === 'image-select'" class="image-challenge">
+        <div class="image-grid">
+          <div *ngFor="let image of currentChallenge.images" 
+               class="image-item"
+               [class.selected]="isImageSelected(image.id)"
+               (click)="onImageSelect(image.id)">
+            <img [src]="'https://picsum.photos/200/150?random=' + image.id" 
+                 [alt]="'Challenge image ' + image.id"
+                 loading="lazy">
+            <div class="image-overlay">
+              <div class="checkmark" *ngIf="isImageSelected(image.id)">✓</div>
+            </div>
+          </div>
+        </div>
+        <p class="instruction">Click on the images that match the description above</p>
+        <div *ngIf="selectedImages.length === 0" class="validation-message">
+          Please select at least one image
+        </div>
+      </div>
+
+      <!-- Text Input Challenge -->
+      <div *ngIf="currentChallenge.type === 'text'" class="text-challenge">
+        <div class="input-group">
+          <input type="text" 
+                 formControlName="textAnswer"
+                 (input)="onTextAnswerChange($event.target.value)"
+                 placeholder="Enter your answer"
+                 class="text-input"
+                 [class.invalid]="isFormControlInvalid('textAnswer')"
+                 [disabled]="isSubmitting">
+          <div *ngIf="isFormControlInvalid('textAnswer')" class="validation-message">
+            Please enter a valid answer
           </div>
         </div>
       </div>
-      <p class="instruction">Click on the images that match the description above</p>
-    </div>
 
-    <!-- Text Input Challenge -->
-    <div *ngIf="getCurrentChallenge()?.type === 'text'" class="text-challenge">
-      <div class="input-group">
-        <input type="text" 
-               [(ngModel)]="answers[currentLevel]"
-               placeholder="Enter your answer"
-               class="text-input"
-               [disabled]="isSubmitting">
+      <!-- Math Challenge -->
+      <div *ngIf="currentChallenge.type === 'math'" class="math-challenge">
+        <div class="input-group">
+          <input type="number" 
+                 formControlName="mathAnswer"
+                 (input)="onMathAnswerChange($event.target.value)"
+                 placeholder="Enter the result"
+                 class="number-input"
+                 [class.invalid]="isFormControlInvalid('mathAnswer')"
+                 [disabled]="isSubmitting">
+          <div *ngIf="isFormControlInvalid('mathAnswer')" class="validation-message">
+            Please enter a valid number
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Math Challenge -->
-    <div *ngIf="getCurrentChallenge()?.type === 'math'" class="math-challenge">
-      <div class="input-group">
-        <input type="number" 
-               [(ngModel)]="answers[currentLevel]"
-               placeholder="Enter the result"
-               class="number-input"
-               [disabled]="isSubmitting">
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="error-message">
+        <span class="error-icon">⚠</span>
+        {{ errorMessage }}
       </div>
-    </div>
 
-    <!-- Error Message -->
-    <div *ngIf="errorMessage" class="error-message">
-      <span class="error-icon">⚠</span>
-      {{ errorMessage }}
-    </div>
-
-    <!-- Submit Button -->
-    <div class="submit-container">
-      <button class="btn btn-primary" 
-              [disabled]="!canSubmit() || isSubmitting"
-              (click)="submitAnswer()">
-        <span *ngIf="isSubmitting" class="spinner-small"></span>
-        {{ isSubmitting ? 'Verifying...' : 'Submit Answer' }}
-      </button>
-    </div>
+      <!-- Submit Button -->
+      <div class="submit-container">
+        <button type="submit"
+                class="btn btn-primary" 
+                [disabled]="!canSubmit() || isSubmitting">
+          <span *ngIf="isSubmitting" class="spinner-small"></span>
+          {{ isSubmitting ? 'Verifying...' : 'Submit Answer' }}
+        </button>
+      </div>
+    </form>
 
     <!-- Result Indicator -->
     <div *ngIf="results[currentLevel] !== null" class="result-indicator">
       <div *ngIf="results[currentLevel]" class="result-success">
         <span class="result-icon">✓</span>
-        Correct! Moving to next level...
+        <span *ngIf="currentLevel < 3">Correct! Moving to next level...</span>
+        <span *ngIf="currentLevel === 3">All challenges completed! Redirecting to results...</span>
       </div>
       <div *ngIf="results[currentLevel] === false" class="result-error">
         <span class="result-icon">✗</span>
@@ -115,10 +153,14 @@
     </div>
   </div>
 
-  <!-- Restart Button -->
-  <div *ngIf="!isLoading && !showSuccess" class="restart-container">
-    <button class="btn btn-secondary" (click)="restart()">
-      Start Over
-    </button>
+  <!-- No Challenge State -->
+  <div *ngIf="!isLoading && !currentChallenge && !showLevelTransition" class="no-challenge-container">
+    <div class="no-challenge-content">
+      <h2>No Challenge Available</h2>
+      <p>Unable to load the captcha challenge. Please try again.</p>
+      <button class="btn btn-primary" (click)="loadCaptcha()">
+        Reload Challenge
+      </button>
+    </div>
   </div>
 </div>

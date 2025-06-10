@@ -1,0 +1,78 @@
+<div class="home-container">
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="brand-name">Angul-It</span>
+        <span class="subtitle">Security Verification System</span>
+      </h1>
+      <p class="hero-description">
+        Complete our multi-stage captcha challenge to verify you're human. 
+        Our advanced system uses image recognition, text input, and mathematical problems 
+        to ensure secure authentication.
+      </p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🖼️</div>
+          <h3>Image Recognition</h3>
+          <p>Identify specific objects in carefully curated images</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📝</div>
+          <h3>Text Challenges</h3>
+          <p>Answer knowledge-based questions accurately</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧮</div>
+          <h3>Math Problems</h3>
+          <p>Solve mathematical equations to prove intelligence</p>
+        </div>
+      </div>
+
+      <div class="action-section">
+        <div class="primary-actions">
+          <button class="btn btn-primary btn-large" (click)="startCaptcha()">
+            <span class="btn-icon">🚀</span>
+            Start New Challenge
+          </button>
+          
+          <button *ngIf="hasInProgressSession" 
+                  class="btn btn-secondary btn-large" 
+                  (click)="continueCaptcha()">
+            <span class="btn-icon">▶️</span>
+            Continue Session
+          </button>
+        </div>
+
+        <div *ngIf="hasCompletedSession" class="secondary-actions">
+          <button class="btn btn-outline" (click)="viewResults()">
+            <span class="btn-icon">📊</span>
+            View Last Results
+          </button>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="info-card">
+          <h4>How it works</h4>
+          <ol class="steps-list">
+            <li>Complete 3 progressive security levels</li>
+            <li>Each level tests different cognitive abilities</li>
+            <li>Your progress is automatically saved</li>
+            <li>View detailed results upon completion</li>
+          </ol>
+        </div>
+        
+        <div class="info-card">
+          <h4>Features</h4>
+          <ul class="features-list">
+            <li>✅ Persistent state management</li>
+            <li>✅ Responsive design</li>
+            <li>✅ Smooth animations</li>
+            <li>✅ Accessibility focused</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

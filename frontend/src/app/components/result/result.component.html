@@ -1,0 +1,109 @@
+<div class="result-container">
+  <div class="result-header">
+    <div class="header-actions">
+      <button class="btn btn-ghost" (click)="goHome()">
+        <span class="btn-icon">🏠</span>
+        Home
+      </button>
+      <button class="btn btn-ghost" (click)="downloadResults()">
+        <span class="btn-icon">📥</span>
+        Download
+      </button>
+    </div>
+    
+    <div class="success-celebration">
+      <div class="celebration-icon">🎉</div>
+      <h1>Verification Complete!</h1>
+      <p>You have successfully completed the security challenge</p>
+    </div>
+  </div>
+
+  <div class="result-summary">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-icon">⏱️</div>
+        <div class="summary-content">
+          <h3>Completion Time</h3>
+          <p class="summary-value">{{ getCompletionTimeFormatted() }}</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">✅</div>
+        <div class="summary-content">
+          <h3>Success Rate</h3>
+          <p class="summary-value">{{ getSuccessRate() }}%</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">🎯</div>
+        <div class="summary-content">
+          <h3>Challenges Completed</h3>
+          <p class="summary-value">{{ completedChallenges }}/{{ totalChallenges }}</p>
+        </div>
+      </div>
+      
+      <div class="summary-card">
+        <div class="summary-icon">🔑</div>
+        <div class="summary-content">
+          <h3>Session ID</h3>
+          <p class="summary-value session-id">{{ sessionId }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-details">
+    <h2>Challenge Details</h2>
+    
+    <div class="challenges-list">
+      <div *ngFor="let level of [1, 2, 3]" 
+           class="challenge-result-card"
+           [class.success]="results[level] === true"
+           [class.failed]="results[level] === false">
+        
+        <div class="challenge-header">
+          <div class="challenge-level">
+            <span class="level-badge">Level {{ level }}</span>
+            <span class="challenge-type">{{ getChallengeTypeDisplay(challenges[level]?.type) }}</span>
+          </div>
+          <div class="challenge-status">
+            <span *ngIf="results[level] === true" class="status-icon success">✓</span>
+            <span *ngIf="results[level] === false" class="status-icon failed">✗</span>
+            <span *ngIf="results[level] === null" class="status-icon pending">⏳</span>
+          </div>
+        </div>
+        
+        <div class="challenge-content">
+          <div class="challenge-question">
+            <strong>Question:</strong> {{ challenges[level]?.question }}
+          </div>
+          <div class="challenge-answer">
+            <strong>Your Answer:</strong> {{ getAnswerDisplay(level) }}
+          </div>
+          <div class="challenge-result">
+            <strong>Result:</strong> 
+            <span [class]="results[level] === true ? 'result-correct' : 'result-incorrect'">
+              {{ results[level] === true ? 'Correct' : 'Incorrect' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-actions">
+    <button class="btn btn-primary btn-large" (click)="startNewChallenge()">
+      <span class="btn-icon">🔄</span>
+      Start New Challenge
+    </button>
+  </div>
+
+  <div class="result-footer">
+    <div class="session-info">
+      <p><strong>Session Started:</strong> {{ startTime | date:'medium' }}</p>
+      <p><strong>Session Completed:</strong> {{ endTime | date:'medium' }}</p>
+    </div>
+  </div>
+</div>

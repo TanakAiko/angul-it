@@ -1,40 +1,85 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { CaptchaService } from '../../services/captcha.service';
-import { CaptchaResponse, CaptchaChallenge, CaptchaSubmission } from '../../models/captcha.model';
+import { StateService } from '../../services/state.service';
+import { CaptchaChallenge, CaptchaSubmission } from '../../models/captcha.model';
 
 @Component({
   selector: 'app-captcha',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './captcha.component.html',
   styleUrls: ['./captcha.component.css']
 })
-export class CaptchaComponent implements OnInit {
-  captchaData: CaptchaResponse | null = null;
-  currentLevel = 1;
-  answers: { [key: number]: any } = {};
-  selectedImages: { [key: number]: string[] } = {};
+export class CaptchaComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
+  captchaForm: FormGroup;
+  currentChallenge: CaptchaChallenge | null = null;
+  selectedImages: string[] = [];
   isLoading = false;
   isSubmitting = false;
-  results: { [key: number]: boolean | null } = { 1: null, 2: null, 3: null };
-  showSuccess = false;
   errorMessage = '';
+  showLevelTransition = false;
+  
+  // State from service
+  currentLevel = 1;
+  results: { [key: number]: boolean | null } = {};
+  challenges: { [key: number]: CaptchaChallenge } = {};
 
-  constructor(private captchaService: CaptchaService) {}
+  constructor(
+    private captchaService: CaptchaService,
+    private stateService: StateService,
+    private router: Router,
+    private fb: FormBuilder
+  ) {
+    this.captchaForm = this.fb.group({
+      textAnswer: ['', [Validators.required, Validators.minLength(1)]],
+      mathAnswer: ['', [Validators.required, Validators.pattern(/^\d+$/)]]
+    });
+  }
 
   ngOnInit() {
-    this.loadCaptcha();
+    // Subscribe to state changes
+    this.stateService.state$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(state => {
+        this.currentLevel = state.currentLevel;
+        this.results = state.results;
+        this.challenges = state.challenges;
+        this.updateCurrentChallenge();
+        this.updateSelectedImages();
+      });
+
+    // Load captcha if not already loaded
+    if (Object.keys(this.challenges).length === 0) {
+      this.loadCaptcha();
+    } else {
+      this.updateCurrentChallenge();
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadCaptcha() {
     this.isLoading = true;
+    this.errorMessage = '';
+    
     this.captchaService.getCaptcha().subscribe({
       next: (data) => {
-        this.captchaData = data;
+        const challenges = {
+          1: data.level1,
+          2: data.level2,
+          3: data.level3
+        };
+        this.stateService.setChallenges(challenges);
         this.isLoading = false;
-        this.resetState();
       },
       error: (error) => {
         console.error('Error loading captcha:', error);
@@ -44,93 +89,99 @@ export class CaptchaComponent implements OnInit {
     });
   }
 
-  resetState() {
-    this.currentLevel = 1;
-    this.answers = {};
-    this.selectedImages = {};
-    this.results = { 1: null, 2: null, 3: null };
-    this.showSuccess = false;
+  updateCurrentChallenge() {
+    this.currentChallenge = this.challenges[this.currentLevel] || null;
+    this.resetForm();
+  }
+
+  updateSelectedImages() {
+    const currentAnswer = this.stateService.currentState.answers[this.currentLevel];
+    if (Array.isArray(currentAnswer)) {
+      this.selectedImages = [...currentAnswer];
+    } else {
+      this.selectedImages = [];
+    }
+  }
+
+  resetForm() {
+    this.captchaForm.reset();
+    this.selectedImages = [];
     this.errorMessage = '';
   }
 
-  getCurrentChallenge(): CaptchaChallenge | null {
-    if (!this.captchaData) return null;
-    
-    switch (this.currentLevel) {
-      case 1: return this.captchaData.level1;
-      case 2: return this.captchaData.level2;
-      case 3: return this.captchaData.level3;
-      default: return null;
-    }
-  }
-
   onImageSelect(imageId: string) {
-    if (!this.selectedImages[this.currentLevel]) {
-      this.selectedImages[this.currentLevel] = [];
-    }
-    
-    const selected = this.selectedImages[this.currentLevel];
-    const index = selected.indexOf(imageId);
+    const index = this.selectedImages.indexOf(imageId);
     
     if (index > -1) {
-      selected.splice(index, 1);
+      this.selectedImages.splice(index, 1);
     } else {
-      selected.push(imageId);
+      this.selectedImages.push(imageId);
     }
     
-    this.answers[this.currentLevel] = [...selected];
+    this.stateService.setAnswer(this.currentLevel, [...this.selectedImages]);
   }
 
   isImageSelected(imageId: string): boolean {
-    return this.selectedImages[this.currentLevel]?.includes(imageId) || false;
+    return this.selectedImages.includes(imageId);
+  }
+
+  onTextAnswerChange(value: string) {
+    this.stateService.setAnswer(this.currentLevel, value);
+  }
+
+  onMathAnswerChange(value: string) {
+    const numValue = value ? parseInt(value, 10) : undefined;
+    this.stateService.setAnswer(this.currentLevel, numValue);
   }
 
   canSubmit(): boolean {
-    const challenge = this.getCurrentChallenge();
-    if (!challenge) return false;
+    if (!this.currentChallenge) return false;
 
-    switch (challenge.type) {
+    const currentAnswer = this.stateService.currentState.answers[this.currentLevel];
+
+    switch (this.currentChallenge.type) {
       case 'image-select':
-        return this.selectedImages[this.currentLevel]?.length > 0;
+        return this.selectedImages.length > 0;
       case 'text':
-        return this.answers[this.currentLevel]?.trim().length > 0;
+        return currentAnswer && currentAnswer.trim().length > 0;
       case 'math':
-        return this.answers[this.currentLevel] !== undefined && this.answers[this.currentLevel] !== '';
+        return currentAnswer !== undefined && currentAnswer !== '';
       default:
         return false;
     }
   }
 
   submitAnswer() {
-    const challenge = this.getCurrentChallenge();
-    if (!challenge || !this.canSubmit()) return;
+    if (!this.currentChallenge || !this.canSubmit()) return;
 
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    let answer = this.answers[this.currentLevel];
-    if (challenge.type === 'math') {
-      answer = Number(answer);
-    }
-
+    const currentAnswer = this.stateService.currentState.answers[this.currentLevel];
+    
     const submission: CaptchaSubmission = {
-      id: challenge.id,
+      id: this.currentChallenge.id,
       level: this.currentLevel,
-      answer: answer
+      answer: currentAnswer
     };
 
     this.captchaService.submitAnswer(submission).subscribe({
       next: (result) => {
-        this.results[this.currentLevel] = result.success;
+        this.stateService.setResult(this.currentLevel, result.success);
         this.isSubmitting = false;
 
         if (result.success) {
           if (this.currentLevel < 3) {
+            this.showLevelTransition = true;
             setTimeout(() => {
-              this.currentLevel++;
-            }, 1000);
+              this.stateService.setCurrentLevel(this.currentLevel + 1);
+              this.showLevelTransition = false;
+            }, 1500);
           } else {
-            this.showSuccess = true;
+            // All levels completed
+            setTimeout(() => {
+              this.router.navigate(['/result']);
+            }, 2000);
           }
         } else {
           this.errorMessage = result.message || 'Incorrect answer. Please try again.';
@@ -144,12 +195,36 @@ export class CaptchaComponent implements OnInit {
     });
   }
 
+  goToPreviousLevel() {
+    if (this.currentLevel > 1) {
+      this.stateService.setCurrentLevel(this.currentLevel - 1);
+    }
+  }
+
+  canGoToPreviousLevel(): boolean {
+    return this.currentLevel > 1;
+  }
+
   restart() {
+    this.stateService.resetState();
     this.loadCaptcha();
+  }
+
+  goHome() {
+    this.router.navigate(['/']);
   }
 
   getProgressPercentage(): number {
     const completedLevels = Object.values(this.results).filter(result => result === true).length;
     return (completedLevels / 3) * 100;
+  }
+
+  getFormControl(controlName: string) {
+    return this.captchaForm.get(controlName);
+  }
+
+  isFormControlInvalid(controlName: string): boolean {
+    const control = this.getFormControl(controlName);
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 }

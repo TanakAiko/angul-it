@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { CaptchaComponent } from './components/captcha/captcha.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [CaptchaComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'Captcha System';
+  title = 'Angul-It Captcha System';
 }
