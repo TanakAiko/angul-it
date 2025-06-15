@@ -49,23 +49,24 @@
     <!-- Challenge Content -->
     <div *ngIf="!isLoading && !showLevelTransition && currentChallenge" class="challenge-container">
         <div class="challenge-header">
-            <div class="level-navigation">
+            <div class="level-navigation-left">
                 <button *ngIf="canGoToPreviousLevel()" class="btn btn-outline btn-small" (click)="goToPreviousLevel()">
                     <span class="btn-icon">←</span>
                     Previous Level
                 </button>
             </div>
 
-            <h2>Level {{ currentLevel }} of 3</h2>
-            <p class="challenge-question">{{ currentChallenge.question }}</p>
+            <div class="challenge-title">
+                <h2>Level {{ currentLevel }} of 3</h2>
+                <p class="challenge-question">{{ currentChallenge.question }}</p>
+            </div>
 
-            <div class="level-navigation">
+            <div class="level-navigation-right">
                 <button *ngIf="canGoToNextLevel()" class="btn btn-outline btn-small" (click)="goToNextLevel()">
                     Next Level
                     <span class="btn-icon">→</span>
                 </button>
             </div>
-
         </div>
 
         <form [formGroup]="captchaForm" (ngSubmit)="submitAnswer()">
