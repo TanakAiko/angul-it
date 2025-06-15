@@ -75,7 +75,7 @@
                 <div class="image-grid">
                     <div *ngFor="let image of currentChallenge.images" class="image-item"
                         [class.selected]="isImageSelected(image.id)" (click)="onImageSelect(image.id)">
-                        <img [src]="'https://picsum.photos/200/150?random=' + image.id"
+                        <img [src]="image.url"
                             [alt]="'Challenge image ' + image.id" loading="lazy">
                         <div class="image-overlay">
                             <div class="checkmark" *ngIf="isImageSelected(image.id)">✓</div>

@@ -84,11 +84,20 @@ export class CaptchaComponent implements OnInit, OnDestroy {
 
     this.captchaService.getCaptcha().subscribe({
       next: (data) => {
-        const challenges = {
+        const challenges: { [key: number]: CaptchaChallenge } = {
           1: data.level1,
           2: data.level2,
           3: data.level3
         };
+
+        // Shuffle images if the challenge type is 'image-select'
+        for (const level in challenges) {
+          const challenge = challenges[level];
+          if (challenge.type === 'image-select' && Array.isArray(challenge.images)) {
+            challenge.images = this.shuffleArray(challenge.images);
+          }
+        }
+
         this.stateService.setChallenges(challenges);
         this.isLoading = false;
       },
@@ -259,5 +268,12 @@ export class CaptchaComponent implements OnInit, OnDestroy {
   isFormControlInvalid(controlName: string): boolean {
     const control = this.getFormControl(controlName);
     return !!(control && control.invalid && (control.dirty));
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    return array
+      .map((value) => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value);
   }
 }
