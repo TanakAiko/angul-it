@@ -1,57 +1,71 @@
 [
     {
         "id": 1,
+        "type": "math",
+        "question": "What is 6 × 7?",
+        "correct": 42
+    },
+    {
+        "id": 2,
         "type": "image-select",
-        "question": "Select all images with a bus",
+        "question": "Where is Luffy?",
         "images": [
             {
-                "url": "https://i.pinimg.com/736x/4f/7b/74/4f7b740a36f2bbe77319c446b8dcf3ff.jpg",
+                "url": "https://i.pinimg.com/736x/6f/cf/70/6fcf70c5575223373c14ddcc36a3ffb8.jpg",
                 "id": "img1"
             },
             {
-                "url": "https://i.pinimg.com/736x/3e/26/67/3e2667d53d576b4864a6b9455b1097f1.jpg",
+                "url": "https://i.pinimg.com/736x/1c/e4/eb/1ce4ebd3d1850f071c74adfc6aa79039.jpg",
                 "id": "img2"
             },
             {
-                "url": "https://i.pinimg.com/736x/81/2a/99/812a99bf2c21285d0307e8dce02d685b.jpg",
+                "url": "https://i.pinimg.com/736x/c6/ef/8f/c6ef8f61e5431e8f13a161cadaf55918.jpg",
                 "id": "img3"
+            }
+        ],
+        "correct": [
+            "img1"
+        ]
+    },
+    {
+        "id": 3,
+        "type": "image-select",
+        "question": "Select all images with a cat",
+        "images": [
+            {
+                "url": "https://i.pinimg.com/736x/43/b8/f7/43b8f757efbe31ed48e6875165f3ee5d.jpg",
+                "id": "img1"
             },
             {
-                "url": "https://i.pinimg.com/736x/fa/dc/17/fadc17eb811f2db9c488d3ba6f205a1c.jpg",
-                "id": "img4"
+                "url": "https://i.pinimg.com/736x/00/dc/31/00dc31f974be4e48a1f9c2403df182a0.jpg",
+                "id": "img2"
             },
             {
-                "url": "https://i.pinimg.com/736x/6f/48/1a/6f481a751a233717341ea362ca227382.jpg",
-                "id": "img5"
-            },
-            {
-                "url": "https://i.pinimg.com/736x/67/76/67/6776676c403f405f656fa595516c2b19.jpg",
-                "id": "img6"
-            },
-            {
-                "url": "https://i.pinimg.com/736x/bf/af/fd/bfaffd04d3bc8ed1b448dab88c91c924.jpg",
-                "id": "img7"
-            },
-            {
-                "url": "https://i.pinimg.com/736x/7d/60/27/7d602759c81e8504fb333535ede7dd19.jpg",
-                "id": "img8"
-            },
-            {
-                "url": "https://i.pinimg.com/736x/9e/2a/bf/9e2abfc3409a9f7a79acd687351cd9e7.jpg",
-                "id": "img9"
+                "url": "https://i.pinimg.com/736x/34/43/e8/3443e85ab81d1d98d31a331d6bba92d9.jpg",
+                "id": "img3"
             }
         ],
         "correct": [
             "img1",
-            "img3",
-            "img6",
-            "img7"
+            "img2"
         ]
     },
     {
-        "id": 2,
+        "id": 4,
+        "type": "math",
+        "question": "What is 8 × 6?",
+        "correct": 48
+    },
+    {
+        "id": 5,
         "type": "text",
-        "question": "Which football club with the most scudetto?",
-        "correct": "Juventus"
+        "question": "Type the word 'elephant' backward.",
+        "correct": "tnahpele"
+    },
+    {
+        "id": 6,
+        "type": "text",
+        "question": "What is the largest planet in our solar system?",
+        "correct": "Jupiter"
     }
 ]

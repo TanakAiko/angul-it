@@ -9,13 +9,13 @@ export class CaptchaGuard implements CanActivate {
   constructor(
     private stateService: StateService,
     private router: Router
-  ) {}
+  ) { }
 
   canActivate(): boolean {
     if (this.stateService.canAccessResults()) {
       return true;
     } else {
-      this.router.navigate(['/captcha']);
+      this.router.navigate(['']);
       return false;
     }
   }
