@@ -1,6 +1,18 @@
+<div align="center">
+
 # Angul-It - Multi-Stage Captcha System
 
+![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![RxJS](https://img.shields.io/badge/RxJS-B7178C?style=for-the-badge&logo=reactivex&logoColor=white)
+
 A sophisticated multi-stage captcha web application built with Angular and Node.js, designed to verify human users through various challenge types including image recognition, text input, and mathematical problems.
+
+![Home Page](imgs/Screenshot%20from%202025-10-16%2000-13-44.png)
+
+</div>
 
 ## 🚀 Features
 
@@ -78,7 +90,7 @@ angul-it/
 ```bash
 cd backend
 npm install
-npm start
+node server.mjs
 ```
 The backend server will run on `http://localhost:3000`
 
@@ -97,6 +109,11 @@ The frontend application will run on `http://localhost:4200`
 2. Click "Start New Challenge" to begin
 3. Complete all three levels sequentially
 4. View detailed results upon completion
+
+### Challenge Interface
+
+![Image Selection Challenge](imgs/Screenshot%20from%202025-10-16%2000-14-42.png)
+*Example of an image selection challenge where users identify specific objects*
 
 ### Challenge Navigation
 - **Progress Bar**: Visual indicator of completion status
@@ -124,42 +141,74 @@ The frontend application will run on `http://localhost:4200`
 - Integer answer validation
 - Clear error messaging
 
+### Completion & Results
+
+![Results Page](imgs/Screenshot%20from%202025-10-16%2000-15-37.png)
+*Detailed results dashboard showing session statistics and performance metrics*
+
 ## 🔧 API Endpoints
 
 ### GET `/api/captcha`
-Retrieves a set of challenges for all three levels.
+Retrieves a set of challenges for all three levels. Each level randomly selects a challenge from its pool.
 
-**Response:**
+**Response Example:**
 ```json
 {
   "level1": {
-    "id": 1,
+    "id": 2,
     "type": "text",
-    "question": "What is the capital of Japan?"
+    "question": "What is the capital of Senegal?"
   },
   "level2": {
+    "id": 2,
+    "type": "image-select",
+    "question": "Where is Luffy?",
+    "images": [
+      { "url": "https://...", "id": "img1" },
+      { "url": "https://...", "id": "img2" },
+      { "url": "https://...", "id": "img3" }
+    ]
+  },
+  "level3": {
     "id": 1,
     "type": "image-select",
     "question": "Select all images with a bus",
     "images": [...]
-  },
-  "level3": {
-    "id": 1,
-    "type": "text",
-    "question": "What is the capital of Senegal?"
   }
 }
 ```
 
+> **Note:** Challenge types vary by level. Level 1 includes text and math challenges, Level 2 includes math and image-select challenges, and Level 3 includes various image-select challenges.
+
 ### POST `/api/captcha`
 Submits an answer for validation.
 
-**Request:**
+**Request Examples:**
+
+Text answer:
+```json
+{
+  "id": 2,
+  "level": 1,
+  "answer": "Dakar"
+}
+```
+
+Math answer:
 ```json
 {
   "id": 1,
-  "level": 1,
-  "answer": "Tokyo"
+  "level": 2,
+  "answer": 42
+}
+```
+
+Image selection answer:
+```json
+{
+  "id": 2,
+  "level": 2,
+  "answer": ["img1"]
 }
 ```
 
@@ -167,6 +216,14 @@ Submits an answer for validation.
 ```json
 {
   "success": true
+}
+```
+
+Or on error:
+```json
+{
+  "success": false,
+  "message": "Answer must be a non-empty string."
 }
 ```
 
@@ -194,11 +251,7 @@ cd frontend
 ng test
 ```
 
-### Backend Testing
-```bash
-cd backend
-npm test
-```
+> **Note:** Backend testing is currently not implemented. Contributions are welcome!
 
 ## 🔒 Security Features
 
@@ -214,19 +267,11 @@ npm test
 - **Desktop Enhanced**: Full-featured desktop experience
 - **Flexible Layouts**: CSS Grid and Flexbox layouts
 
-## 🚀 Deployment
+## 🙏 Acknowledgments
 
-### Frontend Deployment
-```bash
-cd frontend
-ng build --prod
-```
-
-### Backend Deployment
-```bash
-cd backend
-npm start
-```
+- Angular team for the excellent framework
+- Express.js for the robust backend framework
+- Contributors and testers who helped improve the application
 
 ## 🤝 Contributing
 
@@ -236,20 +281,12 @@ npm start
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- Angular team for the excellent framework
-- Express.js for the robust backend framework
-- Contributors and testers who helped improve the application
-
-## 📞 Support
-
-For support, please open an issue in the GitHub repository or contact the development team.
-
 ---
 
-**Built with ❤️ using Angular 19 and Node.js**
+<div align="center">
+
+**⭐ Star this repository if you found it helpful! ⭐**
+
+Made with ❤️ from 🇸🇳
+
+</div>
